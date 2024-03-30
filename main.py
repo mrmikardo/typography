@@ -8,6 +8,9 @@ from typing import List, Optional
 import getch
 from prettytable import DOUBLE_BORDER, PrettyTable
 
+from supabase_utils import SupabaseClient
+
+
 MAX_COMBO_LEN = 5
 DEFAULT_SEQUENCE_LEN = 150
 
@@ -116,6 +119,7 @@ def display_accuracy(mistakes: dict, total_chars: int) -> None:
 
 
 def main():
+    sb = SupabaseClient()
     level_str = input(
         "Please enter the level [1-9] you would like to play and press 'Enter': "
     )
@@ -124,6 +128,7 @@ def main():
     except ValueError:
         print("Please enter a valid level number between 1 and 9.")
         return
+    level_ = level
     level = LEVEL_MAP.get(level)
     characters_to_type = generate_level(level)
     i = 0
@@ -161,6 +166,14 @@ def main():
     display_words_per_minute(num_words, time_taken)
     display_accuracy(mistakes, len(characters_to_type))
     display_mistakes(mistakes)
+    sb.insert_results_row(
+        level_,
+        num_words,
+        len(characters_to_type),
+        sum(mistakes.values()),
+        time_taken,
+        mistakes,
+    )
 
 
 if __name__ == "__main__":
